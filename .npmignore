@@ -1,4 +1,6 @@
-dist/
+tsconfig.json
+src/
+test/
 
 .idea
 .DS_Store
