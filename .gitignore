@@ -1,7 +1,9 @@
 dist/
+test/*.js
 
 .idea
 .DS_Store
+
 
 # Logs
 logs

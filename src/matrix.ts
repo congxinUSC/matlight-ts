@@ -219,34 +219,41 @@ export class Matrix {
   }
 
   static rank(mat: Matrix) {
-    let rank = Math.min(mat.rows, mat.cols);
+    let _mat = mat.copy();
+    let rank = Math.min(_mat.rows, _mat.cols);
     for (let i = 0; i < rank; i++) {
-      if (Utils.isEqual(mat.data[i][i], 0)) {
-        for (let j = i + 1; j < mat.rows; j++) {
-          let mult = mat.data[j][i] / mat.data[i][i];
+      if (!Utils.isEqual(_mat.data[i][i], 0)) {
+        for (let j = i + 1; j < _mat.rows; j++) {
+          let mult = _mat.data[j][i] / _mat.data[i][i];
           for (let k = i; k < rank; k++) {
-            mat.data[j][k] -= mult * mat.data[i][k];
+            _mat.data[j][k] -= mult * _mat.data[i][k];
           }
         }
       } else {
         let reduce = true;
-        for (let j = i + 1; j < mat.rows; j++) {
-          if (Utils.isEqual(mat.data[j][i], 0)) {
-            [mat.data[i], mat.data[j]] = [mat.data[j], mat.data[i]];
+        for (let j = i + 1; j < _mat.rows; j++) {
+          if (Utils.isEqual(_mat.data[j][i], 0)) {
+            [_mat.data[i], _mat.data[j]] = [_mat.data[j], _mat.data[i]];
             reduce = false;
             break;
           }
         }
         if (reduce) {
           rank--;
-          for (let j = i; j < mat.rows; j++) {
-            mat.data[j][i] = mat.data[j][rank];
+          for (let j = i; j < _mat.rows; j++) {
+            _mat.data[j][i] = _mat.data[j][rank];
           }
         }
         i--;
       }
     }
     return rank;
+  }
+
+  static trace(mat: Matrix): number {
+    return Matrix.diagonalElements(mat).reduce((accumulator, cur) => {
+      return accumulator + cur;
+    });
   }
 
   static getRow(mat: Matrix, inds: number[] | number): Vector[] | Vector {
@@ -315,15 +322,14 @@ export class Matrix {
     let x = Vector.randomUnitVector(Math.min(m, n));
     let lastVector;
 
-    let B = m > n ? LinAlg.dot(mat.transpose(), mat) : Matrix.dot(mat, mat.transpose());
+    let B = m >= n ? LinAlg.dot(mat.transpose(), mat) : Matrix.dot(mat, mat.transpose());
 
     for (let i = 0; i<maximumIters; i++) {
-      // console.log(i);
       lastVector = x;
       x = LinAlg.dot(B, lastVector).toVector();
       x = x.div(x.norm());
 
-      if (Utils.isEqual(LinAlg.dot(x, lastVector).toScalar(), 1)) {
+      if (Utils.isEqual(Math.abs(LinAlg.dot(x, lastVector).toScalar()), 1)) {
         break;
       }
     }
@@ -332,8 +338,7 @@ export class Matrix {
 
   static SVD(mat: Matrix, k = 0, maximumIters=200): { U: Matrix; D: Matrix; Vt: Matrix } {
     let m, n;
-
-    let singulars = [];
+    let eigens = [];
     let us = [];
     let vs = [];
     [m, n] = [mat.rows, mat.cols];
@@ -342,15 +347,19 @@ export class Matrix {
     }
     let mat_p = m >= n ? mat : mat.transpose();
 
+    let rank = mat.rank();
+    let nulls = k - rank;
+    k = k < rank? k: rank;
+
     for (let i = 0; i < k; i++) {
       let matrixFor1D = mat.copy();
-      let singularValue, u, v;
+      let eigenValue, u, v;
       let sigma;
       for (let j = 0; j < i; j++) {
-        [singularValue, u, v] = [singulars[j], us[j], vs[j]];
-        matrixFor1D = matrixFor1D.sub(Vector.outer(u, v).mul(singularValue));
+        [eigenValue, u, v] = [eigens[j], us[j], vs[j]];
+        matrixFor1D = matrixFor1D.sub(Vector.outer(u, v).mul(eigenValue));
       }
-      if (m > n) {
+      if (m >= n) {
         v = Matrix.SVD_1D(matrixFor1D, maximumIters);
         let u_unnormalized = LinAlg.dot(mat_p, v).toVector();
         sigma = u_unnormalized.norm();
@@ -361,22 +370,27 @@ export class Matrix {
         sigma = v_unnormalized.norm();
         v = v_unnormalized.div(sigma);
       }
-      singulars.push(sigma);
+      eigens.push(sigma);
       us.push(u);
       vs.push(v);
+    }
+    for(let i=0; i<nulls; i++) {
+      eigens.push(0);
+      us.push(new Vector(us[0].length));
+      vs.push(new Vector(vs[0].length));
     }
 
     return {
       U: Vector.toMatrix(us).transpose(),
-      D: Matrix.constructDiag(singulars),
+      D: Matrix.constructDiag(eigens),
       Vt: Vector.toMatrix(vs)
     };
   }
 
   static pseudoInverse(mat: Matrix, k = 0): Matrix {
     let {U, D, Vt} = Matrix.SVD(mat, k);
-    let singularNum = D.rows;
-    for (let i = 0; i < singularNum; i++) {
+    let eigenNum = D.rows;
+    for (let i = 0; i < eigenNum; i++) {
       if (Utils.isEqual(D.data[i][i], 0)) {
         D.data[i][i] = 0;
       } else {
@@ -406,7 +420,7 @@ export class Matrix {
     if(!mat.isSquare()) {
       throw 'not a square matrix';
     } else if(mat.rank() !== mat.rows) {
-      throw 'matrix is singular to working percision'
+      throw 'matrix is eigen to working percision'
     } else {
       return this.pseudoInverse(mat);
     }
@@ -487,6 +501,10 @@ export class Matrix {
 
   rank(): number {
     return Matrix.rank(this);
+  }
+
+  trace(): number {
+    return Matrix.trace(this);
   }
 
   getRow(inds: number[] | number): Vector[] | Vector {

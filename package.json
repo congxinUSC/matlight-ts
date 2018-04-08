@@ -1,12 +1,13 @@
 {
   "name": "matlight",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A light linear algebra library.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "mocha --reporter spec --require ts-node/register 'test/**/*.test.ts'",
-    "start": "tsc *.ts; babel-node index.js"
+    "build": "tsc",
+    "start": "tsc; tsc test/raw_test.ts; node test/raw_test.js"
   },
   "author": "Congxin Cheng",
   "license": "MIT",

@@ -1,12 +1,21 @@
-import {Matrix} from "../src";
+import {Matrix, Vector} from "../dist"
 
 let m1 = new Matrix(
   [
     [1,2,3],
-    [4,5,6]
+    [4,5,6],
+    [7,8,9],
   ]
 );
-let m2 = m1.transpose();
+
+// console.log(m1.rank());
+// console.log(m1);
+
+// let ret = m1.pseudoInverse();
+// console.log(ret);
+// console.log(ret.dot(m1));
+
+// let m2 = m1.transpose();
 // console.log('m1: ', m1);
 // let m2 = new Matrix(2, 3);
 // console.log('m2: ', m2);
@@ -49,17 +58,17 @@ let m2 = m1.transpose();
 // console.log(m1.dot(v1));
 // console.log(m1.dot);
 
-// let ret = Matrix.SVD(m1);
-// console.log('U: ', ret.U);
-// console.log('D: ', ret.D);
-// console.log('Vt: ', ret.Vt);
-// console.log(ret.U.dot(ret.D).dot(ret.Vt));
+let ret = Matrix.SVD(m1);
+console.log('U: ', ret.U);
+console.log('D: ', ret.D);
+console.log('Vt: ', ret.Vt);
+console.log(ret.U.dot(ret.D).dot(ret.Vt));
 console.log(Matrix.pseudoInverse(m1));
-console.log('--------------------');
+// console.log('--------------------');
 // ret = Matrix.SVD(m2);
 // console.log('U: ', ret.U);
 // console.log('D: ', ret.D);
 // console.log('Vt: ', ret.Vt);
 // console.log(ret.U.dot(ret.D).dot(ret.Vt));
-console.log(Matrix.pseudoInverse(m2));
-console.log('--------------------');
+// console.log(Matrix.pseudoInverse(m2));
+// console.log('--------------------');

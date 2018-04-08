@@ -22,7 +22,7 @@ export class Vector {
   }
 
   static elementWiseOP(vec: Vector, callback: (op: number) => number): Vector;
-  static elementWiseOP(vec: Vector, other, callback: (op1: number, op2: number) => number): Vector;
+  static elementWiseOP(vec: Vector, other: Vector | number, callback: (op1: number, op2: number) => number): Vector;
   static elementWiseOP(arg1: Vector, arg2, arg3?): Vector {
     let vec = new Vector(arg1.data);
 
@@ -84,8 +84,20 @@ export class Vector {
     return new Matrix(data);
   }
 
-  static dot(op1, op2) {
+  static dot(op1: Vector | Matrix, op2: Vector | Matrix): Matrix {
     return LinAlg.dot(op1, op2);
+  }
+
+  static cross(op1: Vector, op2: Vector): Vector {
+    let vec = new Vector(3);
+    if(op1.length !== 3 || op2.length !== 3) {
+      throw 'both operands must be 3 element vector.'
+    } else {
+      vec.data[0] = op1.data[1]*op2.data[2] - op1.data[2]*op2.data[1];
+      vec.data[1] = op1.data[2]*op2.data[0] - op1.data[0]*op2.data[2];
+      vec.data[2] = op1.data[0]*op2.data[1] - op1.data[1]*op2.data[0];
+    }
+    return vec;
   }
 
   static outer(op1: Vector, op2: Vector): Matrix {
@@ -98,6 +110,13 @@ export class Vector {
       }
     }
     return mat;
+  }
+
+  static concat(op1: Vector, op2: Vector): Vector {
+    let vec = new Vector(op1.data);
+    vec.data.concat(op2.data);
+    vec.length += op2.length;
+    return vec;
   }
 
   static norm(vec: Vector, n=2): number {
@@ -118,7 +137,7 @@ export class Vector {
     let arr = new Array(len);
     let sqSum = 0;
     for(let i=0; i<len; i++) {
-      arr[i] = Math.random() + 0.1;
+      arr[i] = Math.random() - 0.5;
       sqSum += arr[i] * arr[i];
     }
     sqSum = Math.sqrt(sqSum);
@@ -172,15 +191,23 @@ export class Vector {
     return this.toMatrix(false);
   }
 
-  dot(other) {
+  dot(other: Vector | Matrix): Matrix {
     return LinAlg.dot(this, other);
   }
 
-  outer(other): Matrix {
+  outer(other: Vector): Matrix {
     return Vector.outer(this, other);
+  }
+
+  cross(other: Vector): Vector {
+    return Vector.cross(this, other);
   }
 
   copy(): Vector {
     return new Vector(this.data);
+  }
+
+  concat(other: Vector): Vector {
+    return Vector.concat(this, other);
   }
 }
