@@ -1,6 +1,8 @@
+.travis.yml
 tsconfig.json
 src/
 test/
+
 
 .idea
 .DS_Store
