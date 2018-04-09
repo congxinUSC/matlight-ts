@@ -52,6 +52,12 @@ export class Vector {
     return vec;
   }
 
+  static neg(vec: Vector) {
+    return Vector.elementWiseOP(vec, (op) => {
+      return -op;
+    });
+  }
+
   static add(vec: Vector, other): Vector {
     return Vector.elementWiseOP(vec, other, (op1, op2) => {
       return op1 + op2;
@@ -119,6 +125,10 @@ export class Vector {
     return vec;
   }
 
+  static subVector(vec: Vector, start=0, len=vec.length): Vector {
+    return new Vector(vec.data.slice(start, start + len));
+  }
+
   static norm(vec: Vector, n=2): number {
     if(n === Infinity) {
       return Math.max(...vec.data.map(x => Math.abs(x)));
@@ -151,6 +161,10 @@ export class Vector {
     return Vector.elementWiseOP(this, arg1, arg2);
   }
 
+  neg(): Vector {
+    return Vector.neg(this);
+  }
+
   add(other): Vector {
     return Vector.elementWiseOP(this, other, (op1, op2) => {
       return op1 + op2;
@@ -175,8 +189,8 @@ export class Vector {
     });
   }
 
-  norm(): number {
-    return Vector.norm(this);
+  norm(n = 2): number {
+    return Vector.norm(this, n);
   }
 
   toMatrix(col=true): Matrix {
@@ -209,5 +223,9 @@ export class Vector {
 
   concat(other: Vector): Vector {
     return Vector.concat(this, other);
+  }
+
+  subVector(start=0, len = this.length): Vector {
+    return Vector.subVector(this, start, len);
   }
 }

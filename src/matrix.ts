@@ -37,9 +37,6 @@ export class Matrix {
         throw 'invalid parameter';
       }
       this.data = arg1.map((row: Array<number>) => {
-        if (!(row instanceof Array)) {
-          throw 'invalid parameter';
-        }
         return row.slice();
       });
       this.rows = arg1.length;
@@ -182,7 +179,27 @@ export class Matrix {
     return ret;
   }
 
-  static det(mat: Matrix): number {
+  static upper(mat: Matrix): Matrix {
+    let ret = mat.copy();
+    for(let i=0; i<mat.rows; i++) {
+      for(let j=0; j<i; j++) {
+        ret.data[i][j] = 0;
+      }
+    }
+    return ret;
+  }
+
+  static lower(mat: Matrix): Matrix {
+    let ret = mat.copy();
+    for(let i=0; i<mat.rows; i++) {
+      for(let j=i+1; j<mat.cols; j++) {
+        ret.data[i][j] = 0;
+      }
+    }
+    return ret;
+  }
+
+  static det_definition(mat: Matrix): number {
     if (!Matrix.isSquare(mat)) {
       throw 'invalid size';
     }
@@ -199,6 +216,13 @@ export class Matrix {
       ret += term;
     });
     return ret;
+  }
+
+  static det(mat: Matrix): number {
+    let U = Matrix.LU(mat).U;
+    return Matrix.diagonalElements(U).reduce((mult, cur) => {
+      return mult * cur;
+    }, 1);
   }
 
   static constructDiag(arr: Array<number>): Matrix {
@@ -256,53 +280,31 @@ export class Matrix {
     });
   }
 
-  static getRow(mat: Matrix, inds: number[] | number): Vector[] | Vector {
+  static getRow(mat: Matrix, ind: number): Vector {
     let ret;
-    if (typeof(inds) === 'number') {
-      if (inds < 0 || inds >= mat.rows) {
-        throw 'invalid input';
-      } else {
-        ret = new Vector(mat.data[inds]);
-      }
+    if (ind < 0 || ind >= mat.rows) {
+      throw 'invalid input';
     } else {
-      ret = new Array(inds.length);
-      for (let i = 0; i < inds.length; i++) {
-        if (inds[i] < 0 || inds[i] >= mat.rows) {
-          throw 'invalid input';
-        } else {
-          ret[i] = new Vector(mat.data[inds[i]]);
-        }
-      }
+      ret = new Vector(mat.data[ind]);
     }
     return ret;
   }
 
-  static getCol(mat: Matrix, inds: number[] | number): Vector[] | Vector {
+  static getCol(mat: Matrix, ind: number): Vector {
     let ret;
-    if (typeof(inds) === 'number') {
-      if (inds < 0 || inds >= mat.cols) {
-        throw 'invalid input';
-      } else {
-        ret = new Vector(Utils.columnOf(mat.data, inds));
-      }
+    if (ind < 0 || ind >= mat.cols) {
+      throw 'invalid input';
     } else {
-      ret = new Array(inds.length);
-      for (let i = 0; i < inds.length; i++) {
-        if (inds[i] < 0 || inds[i] >= mat.cols) {
-          throw 'invalid input';
-        } else {
-          ret[i] = new Vector(Utils.columnOf(mat.data, inds[i]));
-        }
-      }
+      ret = new Vector(Utils.columnOf(mat.data, ind));
     }
     return ret;
   }
 
   static toVector(mat: Matrix, isCol = true): Vector {
     if (isCol && mat.cols === 1) {
-      return Matrix.getCol(mat, 0) as Vector;
+      return Matrix.getCol(mat, 0);
     } else if (!isCol && mat.rows === 1) {
-      return Matrix.getRow(mat, 0) as Vector;
+      return Matrix.getRow(mat, 0);
     } else {
       throw 'invalid size';
     }
@@ -313,6 +315,76 @@ export class Matrix {
       throw 'this matrix is not 1 by 1';
     } else {
       return mat.data[0][0];
+    }
+  }
+
+  static LU(mat: Matrix): {L: Matrix, U: Matrix} {
+    if(!mat.isSquare()) {
+      throw 'not a square matrix';
+    }
+    let n = mat.rows;
+    let L = new Matrix(n);
+    let U = new Matrix(n);
+    for(let i=0; i<n; i++) {
+      // upper part
+      for(let j=i; j<n; j++) {
+        let sum = 0;
+        for(let k=0; k<i; k++) {
+          sum += L.data[i][k] * U.data[k][j];
+        }
+        U.data[i][j] = mat.data[i][j] - sum;
+      }
+      // lower part
+      L.data[i][i] = 1;
+      for(let j=i+1; j<n; j++) {
+        let sum = 0;
+        for(let k=0; k<i; k++) {
+          sum += L.data[j][k] * U.data[k][i];
+        }
+        L.data[j][i] = (mat.data[j][i] - sum) / U.data[i][i];
+      }
+    }
+    return {
+      L: L,
+      U: U
+    }
+  }
+
+  static QR(mat: Matrix): {Q: Matrix, R: Matrix} {
+    let m = mat.rows;
+    let n = mat.cols;
+    let R = mat.copy();
+    let Qt = Matrix.identity(m);
+    for(let i=0; i<n; i++) {
+      // find the HH reflector
+      let v = R.getCol(i).subVector(i, m-i).neg();
+      if(Utils.isEqual(v.norm(), 0)) {
+        break;
+      }
+      v.data[0] += v.data[0]>=0? v.norm(): -v.norm();
+      v = v.div(v.norm());
+
+      // apply the HH reflection to each column of mat and Q
+      for(let j=0; j<n; j++) {
+        let temp = R.getCol(j).subVector(i, m-i);
+        temp = temp.sub(v.mul(2 * v.dot(temp).toScalar()));
+        for(let k=i; k<m; k++) {
+          R.data[k][j] = temp.data[k-i];
+        }
+      }
+      for(let j=0; j<m; j++) {
+        let temp = Qt.getCol(j).subVector(i, m-i);
+        temp = temp.sub(v.mul(2 * v.dot(temp).toScalar()));
+        for(let k=i; k<m; k++) {
+          Qt.data[k][j] = temp.data[k-i];
+        }
+      }
+      console.log('step: ', i);
+      console.log(R);
+    }
+    return {
+      Q: Qt.transpose(),
+      R: R.upper()
     }
   }
 
@@ -449,19 +521,19 @@ export class Matrix {
     });
   }
 
-  sub(other: Matrix): Matrix {
+  sub(other): Matrix {
     return Matrix.elementWiseOP(this, other, (op1, op2) => {
       return op1 - op2;
     });
   }
 
-  mul(other: Matrix): Matrix {
+  mul(other): Matrix {
     return Matrix.elementWiseOP(this, other, (op1, op2) => {
       return op1 * op2;
     });
   }
 
-  div(other: Matrix): Matrix {
+  div(other): Matrix {
     return Matrix.elementWiseOP(this, other, (op1, op2) => {
       return op1 / op2;
     });
@@ -495,6 +567,14 @@ export class Matrix {
     return Matrix.diagonalElements(this);
   }
 
+  upper(): Matrix {
+    return Matrix.upper(this);
+  }
+
+  lower(): Matrix {
+    return Matrix.lower(this);
+  }
+
   det(): number {
     return Matrix.det(this);
   }
@@ -507,12 +587,12 @@ export class Matrix {
     return Matrix.trace(this);
   }
 
-  getRow(inds: number[] | number): Vector[] | Vector {
-    return Matrix.getRow(this, inds);
+  getRow(ind: number): Vector {
+    return Matrix.getRow(this, ind);
   }
 
-  getCol(inds: number[] | number): Vector[] | Vector {
-    return Matrix.getCol(this, inds);
+  getCol(ind: number): Vector {
+    return Matrix.getCol(this, ind);
   }
 
   toVector(isCol = true): Vector {

@@ -2,11 +2,23 @@ import {Matrix, Vector} from "../dist"
 
 let m1 = new Matrix(
   [
-    [1,2,3],
-    [4,5,6],
-    [7,8,9],
+    [1,2,3,4],
+    [5,6,7,8],
+    [9,10,11,12]
   ]
 );
+
+let ret = Matrix.QR(m1);
+console.log('Q: ', ret.Q);
+console.log('R: ', ret.R);
+console.log('QR: ', ret.Q.dot(ret.R));
+
+// let ret = Matrix.LU(m1);
+// console.log('L: ', ret.L);
+// console.log('U: ', ret.U);
+// console.log('LU: ', ret.L.dot(ret.U));
+//
+// console.log(m1.det());
 
 // console.log(m1.rank());
 // console.log(m1);
@@ -58,12 +70,12 @@ let m1 = new Matrix(
 // console.log(m1.dot(v1));
 // console.log(m1.dot);
 
-let ret = Matrix.SVD(m1);
-console.log('U: ', ret.U);
-console.log('D: ', ret.D);
-console.log('Vt: ', ret.Vt);
-console.log(ret.U.dot(ret.D).dot(ret.Vt));
-console.log(Matrix.pseudoInverse(m1));
+// let ret = Matrix.SVD(m1);
+// console.log('U: ', ret.U);
+// console.log('D: ', ret.D);
+// console.log('Vt: ', ret.Vt);
+// console.log(ret.U.dot(ret.D).dot(ret.Vt));
+// console.log(Matrix.pseudoInverse(m1));
 // console.log('--------------------');
 // ret = Matrix.SVD(m2);
 // console.log('U: ', ret.U);
