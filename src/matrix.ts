@@ -219,6 +219,9 @@ export class Matrix {
   }
 
   static det(mat: Matrix): number {
+    if (!Matrix.isSquare(mat)) {
+      throw 'invalid size';
+    }
     let U = Matrix.LU(mat).U;
     return Matrix.diagonalElements(U).reduce((mult, cur) => {
       return mult * cur;
@@ -319,31 +322,70 @@ export class Matrix {
   }
 
   static LU(mat: Matrix): {L: Matrix, U: Matrix} {
-    if(!mat.isSquare()) {
-      throw 'not a square matrix';
-    }
-    let n = mat.rows;
-    let L = new Matrix(n);
-    let U = new Matrix(n);
-    for(let i=0; i<n; i++) {
-      // upper part
-      for(let j=i; j<n; j++) {
-        let sum = 0;
-        for(let k=0; k<i; k++) {
-          sum += L.data[i][k] * U.data[k][j];
+    let m = mat.rows;
+    let n = mat.cols;
+
+    let L, U;
+
+    if(m <= n) {
+      L = new Matrix(m);
+      U = new Matrix(m, n);
+
+      for(let i=0; i<m; i++) {
+        // upper part
+        for(let j=i; j<n; j++) {
+          let sum = 0;
+          for(let k=0; k<i; k++) {
+            sum += L.data[i][k] * U.data[k][j];
+          }
+          U.data[i][j] = mat.data[i][j] - sum;
         }
-        U.data[i][j] = mat.data[i][j] - sum;
-      }
-      // lower part
-      L.data[i][i] = 1;
-      for(let j=i+1; j<n; j++) {
-        let sum = 0;
-        for(let k=0; k<i; k++) {
-          sum += L.data[j][k] * U.data[k][i];
+        // lower part
+        L.data[i][i] = 1;
+        for(let j=i+1; j<m; j++) {
+          let sum = 0;
+          for(let k=0; k<i; k++) {
+            sum += L.data[j][k] * U.data[k][i];
+          }
+          if(Utils.isEqual(U.data[i][i], 0)) {
+            L.data[j][i] = 1;
+          } else {
+            L.data[j][i] = (mat.data[j][i] - sum) / U.data[i][i];
+          }
         }
-        L.data[j][i] = (mat.data[j][i] - sum) / U.data[i][i];
+      }
+    } else {
+      L = new Matrix(m, n);
+      U = new Matrix(n);
+
+      for(let i=0; i<m; i++) {
+        // upper part
+        for(let j=i; j<n; j++) {
+          let sum = 0;
+          for(let k=0; k<i; k++) {
+            sum += L.data[i][k] * U.data[k][j];
+          }
+          U.data[i][j] = mat.data[i][j] - sum;
+        }
+        // lower part
+        if(i<n) {
+          L.data[i][i] = 1;
+          for(let j=i+1; j<m; j++) {
+            let sum = 0;
+            for(let k=0; k<i; k++) {
+              sum += L.data[j][k] * U.data[k][i];
+            }
+            if(Utils.isEqual(U.data[i][i], 0)) {
+              L.data[j][i] = 1;
+            } else {
+              L.data[j][i] = (mat.data[j][i] - sum) / U.data[i][i];
+            }
+          }
+        }
       }
     }
+
+
     return {
       L: L,
       U: U

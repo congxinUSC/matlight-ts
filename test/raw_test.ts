@@ -1,22 +1,30 @@
 import {Matrix, Vector} from "../dist"
 
+// let m1 = new Matrix(
+//   [
+//     [1,2,3,4],
+//     [5,6,7,8],
+//     [9,10,11,12]
+//   ]
+// );
+
 let m1 = new Matrix(
   [
-    [1,2,3,4],
-    [5,6,7,8],
-    [9,10,11,12]
+    [1,1,1,1],
+    [1,1,1,1],
+    [1,1,1,1]
   ]
 );
 
-let ret = Matrix.QR(m1);
-console.log('Q: ', ret.Q);
-console.log('R: ', ret.R);
-console.log('QR: ', ret.Q.dot(ret.R));
+// let ret = Matrix.QR(m1);
+// console.log('Q: ', ret.Q);
+// console.log('R: ', ret.R);
+// console.log('QR: ', ret.Q.dot(ret.R));
 
-// let ret = Matrix.LU(m1);
-// console.log('L: ', ret.L);
-// console.log('U: ', ret.U);
-// console.log('LU: ', ret.L.dot(ret.U));
+let ret = Matrix.LU(m1.transpose());
+console.log('L: ', ret.L);
+console.log('U: ', ret.U);
+console.log('LU: ', ret.L.dot(ret.U));
 //
 // console.log(m1.det());
 
