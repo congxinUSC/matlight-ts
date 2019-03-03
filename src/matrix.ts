@@ -259,7 +259,7 @@ export class Matrix {
       } else {
         let reduce = true;
         for (let j = i + 1; j < _mat.rows; j++) {
-          if (Utils.isEqual(_mat.data[j][i], 0)) {
+          if (!Utils.isEqual(_mat.data[j][i], 0)) {
             [_mat.data[i], _mat.data[j]] = [_mat.data[j], _mat.data[i]];
             reduce = false;
             break;

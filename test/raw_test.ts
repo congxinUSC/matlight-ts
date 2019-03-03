@@ -1,94 +1,30 @@
-import {Matrix, Vector} from "../dist"
+import {Matrix, Vector} from "../src"
 
-// let m1 = new Matrix(
-//   [
-//     [1,2,3,4],
-//     [5,6,7,8],
-//     [9,10,11,12]
-//   ]
-// );
-
-let m1 = new Matrix(
-  [
-    [1,1,1,1],
-    [1,1,1,1],
-    [1,1,1,1]
-  ]
+let problemMatrix = new Matrix(
+    [
+        [23.2, 0, 0, 1, 0, 0, 0, 0, -34.22, 0, 0, -1.475],
+        [0, 0, 0, 0, 23.2, 0, 0, 1, 8.4825, 0, 0, 0.365625],
+        [23.2, 0, 2.35, 1, 0, 0, 0, 0, -34.22, 0, -3.4662500000000005, -1.475],
+        [0, 0, 0, 0, 23.2, 0, 2.35, 1, 11.382499999999999, 0, 1.15296875, 0.490625],
+        [28.8, 0, 2.35, 1, 0, 0, 0, 0, -55.6, 0, -4.5368055555555555, -1.9305555555555556],
+        [0, 0, 0, 0, 28.8, 0, 2.35, 1, 14.58, 0, 1.1896875, 0.50625],
+        [28.8, 0, 0, 1, 0, 0, 0, 0, -55.52, 0, 0, -1.9277777777777778],
+        [0, 0, 0, 0, 28.8, 0, 0, 1, 11.295000000000002, 0, 0, 0.3921875],
+        [23.2, 68, 0, 1, 0, 0, 0, 0, -6.96, -20.4, 0, -0.3],
+        [0, 0, 0, 0, 23.2, 68, 0, 1, 13.5575, 39.7375, 0, 0.584375],
+        [23.2, 68, 2.35, 1, 0, 0, 0, 0, -6.96, -20.4, -0.705, -0.3],
+        [0, 0, 0, 0, 23.2, 68, 2.35, 1, 14.427499999999998, 42.287499999999994, 1.46140625, 0.621875],
+        [28.8, 68, 2.35, 1, 0, 0, 0, 0, -13.2, -31.166666666666664, -1.0770833333333334, -0.4583333333333333],
+        [0, 0, 0, 0, 28.8, 68, 2.35, 1, 17.955, 42.39375, 1.465078125, 0.6234375],
+        [28.8, 68, 0, 1, 0, 0, 0, 0, -13.2, -31.166666666666664, 0, -0.4583333333333333],
+        [0, 0, 0, 0, 28.8, 68, 0, 1, 16.965000000000003, 40.056250000000006, 0, 0.5890625]
+    ]
 );
 
-// let ret = Matrix.QR(m1);
-// console.log('Q: ', ret.Q);
-// console.log('R: ', ret.R);
-// console.log('QR: ', ret.Q.dot(ret.R));
+console.log ('in raw_test.ts');
+let res = problemMatrix.rank();
 
-let ret = Matrix.LU(m1.transpose());
-console.log('L: ', ret.L);
-console.log('U: ', ret.U);
-console.log('LU: ', ret.L.dot(ret.U));
-//
-// console.log(m1.det());
+console.log(res);
 
-// console.log(m1.rank());
-// console.log(m1);
-
-// let ret = m1.pseudoInverse();
-// console.log(ret);
-// console.log(ret.dot(m1));
-
-// let m2 = m1.transpose();
-// console.log('m1: ', m1);
-// let m2 = new Matrix(2, 3);
-// console.log('m2: ', m2);
-// let m3 = new Matrix(3);
-// console.log('m3: ', m3);
-// let m4 = Matrix.transpose(m1);
-// console.log('m4: ', m4);
-//
-// console.log('-m1: ', m1.neg());
-// console.log('m1 + 1: ', m1.add(1));
-// console.log('m1 / 0: ', m1.div(0));
-//
-// let m2 = new Matrix("asdf");
-
-
-// let m5 = new Matrix(
-//   [
-//     [1,2,7,3],
-//     [3,4,9,5],
-//     [5,6,8,12],
-//     [1,5,9,2]
-//   ]
-// );
-//
-// let m6 = new Matrix(
-//   [
-//     [1,2,3],
-//     [2,4,7],
-//     [23,46,30],
-//     [7,14,1]
-//   ]
-// );
-
-// console.log(Matrix.det(m5));
-// console.log(Matrix.rank(m5));
-// console.log(Matrix.rank(m6));
-
-// let v1 = new Vector([1,2,3]);
-// console.log(v1.toMatrix());
-// console.log(m1.dot(v1));
-// console.log(m1.dot);
-
-// let ret = Matrix.SVD(m1);
-// console.log('U: ', ret.U);
-// console.log('D: ', ret.D);
-// console.log('Vt: ', ret.Vt);
-// console.log(ret.U.dot(ret.D).dot(ret.Vt));
-// console.log(Matrix.pseudoInverse(m1));
-// console.log('--------------------');
-// ret = Matrix.SVD(m2);
-// console.log('U: ', ret.U);
-// console.log('D: ', ret.D);
-// console.log('Vt: ', ret.Vt);
-// console.log(ret.U.dot(ret.D).dot(ret.Vt));
-// console.log(Matrix.pseudoInverse(m2));
-// console.log('--------------------');
+let {U, D, Vt} = Matrix.SVD(problemMatrix);
+console.log(U, D, Vt);
