@@ -534,7 +534,7 @@ export class Matrix {
     if(!mat.isSquare()) {
       throw 'not a square matrix';
     } else if(mat.rank() !== mat.rows) {
-      throw 'matrix is eigen to working percision'
+      throw 'matrix is singular to working precision'
     } else {
       return this.pseudoInverse(mat);
     }
